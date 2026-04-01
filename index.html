@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- STATS ROW -->
+<div class="row mb-4 g-3">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <h2 class="display-4">{{ stats.total }}</h2>
+                <p class="fs-5">Total Alumni</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <h3>{{ stats.years|length }}</h3>
+                <p class="fs-6">Batch Years</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <h3>{{ stats.companies|length }}</h3>
+                <p class="fs-6">Companies</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning h-100">
+            <div class="card-body text-center">
+                <a href="/export" class="btn btn-light btn-lg w-100">📊 Export CSV</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5>📈 Alumni by Graduation Year</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="yearChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>🏢 Top Companies</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="companyChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SEARCH & CONTROLS -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <form method="POST">
+            <div class="input-group">
+                <span class="input-group-text">🔍</span>
+                <input type="text" class="form-control form-control-lg" name="search" 
+                       placeholder="Search by name, company, or year..." value="{{ search }}">
+                <button class="btn btn-primary btn-lg" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4 d-flex gap-2 justify-content-end">
+        <a href="/add" class="btn btn-success btn-lg">➕ Add Alumni</a>
+        <a href="/seed" class="btn btn-info btn-lg">🌱 Sample Data</a>
+        <a href="/logout" class="btn btn-outline-secondary btn-lg">🚪 Logout</a>
+    </div>
+</div>
+
+<!-- DATA TABLE -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5>👥 Alumni List ({{ alumni|length }} shown)</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if alumni %}
+        <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th><th>Profile</th><th>Name</th><th>Grad Year</th><th>Job Title</th><th>Company</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in alumni %}
+                <tr>
+                    <td>{{ a.id }}</td>
+                    <td><a href="/profile/{{ a.id }}" class="btn btn-sm btn-outline-info">👤</a></td>
+                    <td><strong>{{ a.name }}</strong></td>
+                    <td><span class="badge bg-secondary">{{ a.grad_year }}</span></td>
+                    <td>{{ a.job_title }}</td>
+                    <td><span class="badge bg-primary">{{ a.company }}</span></td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="/edit/{{ a.id }}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="/delete/{{ a.id }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <div class="p-5 text-center">
+            <h4>👋 No alumni{% if search %} matching "{{ search }}"{% endif %}</h4>
+            <a href="/add" class="btn btn-primary btn-lg">➕ Add First Alumni</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+const yearCtx = document.getElementById('yearChart');
+new Chart(yearCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ stats.years.keys()|list|tojson }},
+        datasets: [{
+            data: {{ stats.years.values()|list|tojson }},
+            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+            borderColor: 'rgba(102, 126, 234, 1)'
+        }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+});
+
+const companyCtx = document.getElementById('companyChart');
+new Chart(companyCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ stats.companies.keys()|list|tojson }},
+        datasets: [{
+            data: {{ stats.companies.values()|list|tojson }},
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+        }]
+    },
+    options: { responsive: true }
+});
+</script>
+{% endblock %}
