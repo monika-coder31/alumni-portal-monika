@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-warning text-white text-center">
+        <h3><i class="fas fa-edit"></i> Edit Alumni: {{ alumni.name }}</h3>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Full Name</label>
+            <input type="text" name="name" value="{{ alumni.name }}" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Graduation Year</label>
+            <input type="number" name="grad_year" value="{{ alumni.grad_year }}" class="form-control" min="2000" max="2030" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Job Title</label>
+            <input type="text" name="job_title" value="{{ alumni.job_title }}" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Company</label>
+            <input type="text" name="company" value="{{ alumni.company }}" class="form-control" required>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-warning btn-lg">
+              <i class="fas fa-save"></i> Update Alumni
+            </button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
