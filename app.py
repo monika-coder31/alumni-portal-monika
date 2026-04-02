@@ -1,22 +1,15 @@
-import os
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from functools import wraps
-from io import BytesIO
 import csv
+import os
 
 app = Flask(__name__)
-app.secret_key = 'ai1232026'
-
-# Heroku: Use postgres, Local: SQLite
-if os.environ.get('DATABASE_URL'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://")
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///alumni.db'
-    
+app.config['SECRET_KEY'] = 'ai123secret'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///alumni.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# Alumni Model
 class Alumni(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -24,80 +17,66 @@ class Alumni(db.Model):
     job_title = db.Column(db.String(100), nullable=False)
     company = db.Column(db.String(100), nullable=False)
 
-ADMIN_PASSWORD = "ai123"
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'logged_in' not in session:
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
+# Create DB
 with app.app_context():
     db.create_all()
 
-def get_stats():
-    alumni = Alumni.query.all()
-    years, companies = {}, {}
-    for a in alumni:
-        years[a.grad_year] = years.get(a.grad_year, 0) + 1
-        companies[a.company] = companies.get(a.company, 0) + 1
-    return {
-        'total': len(alumni),
-        'years': dict(sorted(years.items())),
-        'companies': dict(sorted(companies.items(), key=lambda x: x[1], reverse=True)[:5])
-    }
+# Login check
+def login_required(f):
+    def wrap(*args, **kwargs):
+        if 'logged_in' not in session:
+            flash('Please login first!')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    wrap.__name__ = f.__name__
+    return wrap
 
-# ALL YOUR ROUTES (same as Day 4 - login, index, add, edit, delete, seed, export)
+@app.route('/')
+def index():
+    search = request.args.get('search', '')
+    alumni = Alumni.query
+    if search:
+        alumni = alumni.filter(
+            db.or_(
+                Alumni.name.contains(search),
+                Alumni.company.contains(search),
+                Alumni.job_title.contains(search)
+            )
+        )
+    alumni_list = alumni.order_by(Alumni.name).all()
+    total = len(alumni_list)
+    return render_template('index.html', alumni=alumni_list, search=search, total=total)
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form['password'] == ADMIN_PASSWORD:
+        if request.form['password'] == 'ai123':
             session['logged_in'] = True
+            flash('Logged in successfully!')
             return redirect(url_for('index'))
+        flash('Wrong password!')
     return render_template('login.html')
 
 @app.route('/logout')
+@login_required
 def logout():
     session.pop('logged_in', None)
-    return redirect(url_for('login'))
-
-@app.route('/', methods=['GET', 'POST'])
-@login_required
-def index():
-    search = request.form.get('search', '') if request.method == 'POST' else ''
-    alumni = Alumni.query.all()
-    if search:
-        alumni = [a for a in alumni if search.lower() in a.name.lower() or 
-                 search.lower() in a.company.lower() or str(a.grad_year).startswith(search)]
-    stats = get_stats()
-    return render_template('index.html', alumni=alumni, search=search, stats=stats)
-
-@app.route('/export')
-@login_required
-def export():
-    alumni = Alumni.query.all()
-    si = BytesIO()
-    cw = csv.writer(si)
-    cw.writerow(['ID', 'Name', 'Grad Year', 'Job Title', 'Company'])
-    for a in alumni:
-        cw.writerow([a.id, a.name, a.grad_year, a.job_title, a.company])
-    si.seek(0)
-    return send_file(si, mimetype='text/csv', as_attachment=True, download_name='alumni_data.csv')
+    flash('Logged out!')
+    return redirect(url_for('index'))
 
 @app.route('/add', methods=['GET', 'POST'])
 @login_required
 def add():
     if request.method == 'POST':
         alumni = Alumni(
-            name=request.form['name'].strip(),
+            name=request.form['name'],
             grad_year=int(request.form['grad_year']),
-            job_title=request.form['job_title'].strip(),
-            company=request.form['company'].strip()
+            job_title=request.form['job_title'],
+            company=request.form['company']
         )
         db.session.add(alumni)
         db.session.commit()
+        flash('Alumni added!')
         return redirect(url_for('index'))
     return render_template('add.html')
 
@@ -106,11 +85,12 @@ def add():
 def edit(id):
     alumni = Alumni.query.get_or_404(id)
     if request.method == 'POST':
-        alumni.name = request.form['name'].strip()
+        alumni.name = request.form['name']
         alumni.grad_year = int(request.form['grad_year'])
-        alumni.job_title = request.form['job_title'].strip()
-        alumni.company = request.form['company'].strip()
+        alumni.job_title = request.form['job_title']
+        alumni.company = request.form['company']
         db.session.commit()
+        flash('Alumni updated!')
         return redirect(url_for('index'))
     return render_template('edit.html', alumni=alumni)
 
@@ -120,25 +100,174 @@ def delete(id):
     alumni = Alumni.query.get_or_404(id)
     db.session.delete(alumni)
     db.session.commit()
+    flash('Alumni deleted!')
     return redirect(url_for('index'))
 
-@app.route('/seed')
+@app.route('/export')
 @login_required
-def seed():
+def export():
+    alumni_list = Alumni.query.all()
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['Name', 'Grad Year', 'Job Title', 'Company'])
+    for alumni in alumni_list:
+        cw.writerow([alumni.name, alumni.grad_year, alumni.job_title, alumni.company])
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
+
+@app.route('/sample')
+@login_required
+def sample():
     sample_data = [
-        ('Ravi Kumar', 2025, 'AI Engineer', 'Google'),
-        ('Priya Singh', 2024, 'Data Scientist', 'Microsoft'),
-        ('Arjun Reddy', 2023, 'ML Engineer', 'Amazon'),
-        ('Sneha Patel', 2026, 'Software Developer', 'TCS'),
-        ('Vikram Joshi', 2022, 'DevOps Engineer', 'Infosys')
+        ('Ravi Kumar', 2020, 'Software Engineer', 'TCS'),
+        ('Priya Sharma', 2021, 'Data Scientist', 'Google'),
+        ('Arun Patel', 2019, 'ML Engineer', 'Microsoft')
     ]
-    for name, year, job, company in sample_data:
+    for name, year, title, company in sample_data:
         if not Alumni.query.filter_by(name=name).first():
-            alumni = Alumni(name=name, grad_year=year, job_title=job, company=company)
+            alumni = Alumni(name=name, grad_year=year, job_title=title, company=company)
             db.session.add(alumni)
     db.session.commit()
+    flash('Sample data added!')
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(debug=True)from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_sqlalchemy import SQLAlchemy
+import csv
+import os
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'ai123secret'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///alumni.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# Alumni Model
+class Alumni(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    grad_year = db.Column(db.Integer, nullable=False)
+    job_title = db.Column(db.String(100), nullable=False)
+    company = db.Column(db.String(100), nullable=False)
+
+# Create DB
+with app.app_context():
+    db.create_all()
+
+# Login check
+def login_required(f):
+    def wrap(*args, **kwargs):
+        if 'logged_in' not in session:
+            flash('Please login first!')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    wrap.__name__ = f.__name__
+    return wrap
+
+@app.route('/')
+def index():
+    search = request.args.get('search', '')
+    alumni = Alumni.query
+    if search:
+        alumni = alumni.filter(
+            db.or_(
+                Alumni.name.contains(search),
+                Alumni.company.contains(search),
+                Alumni.job_title.contains(search)
+            )
+        )
+    alumni_list = alumni.order_by(Alumni.name).all()
+    total = len(alumni_list)
+    return render_template('index.html', alumni=alumni_list, search=search, total=total)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['password'] == 'ai123':
+            session['logged_in'] = True
+            flash('Logged in successfully!')
+            return redirect(url_for('index'))
+        flash('Wrong password!')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    session.pop('logged_in', None)
+    flash('Logged out!')
+    return redirect(url_for('index'))
+
+@app.route('/add', methods=['GET', 'POST'])
+@login_required
+def add():
+    if request.method == 'POST':
+        alumni = Alumni(
+            name=request.form['name'],
+            grad_year=int(request.form['grad_year']),
+            job_title=request.form['job_title'],
+            company=request.form['company']
+        )
+        db.session.add(alumni)
+        db.session.commit()
+        flash('Alumni added!')
+        return redirect(url_for('index'))
+    return render_template('add.html')
+
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit(id):
+    alumni = Alumni.query.get_or_404(id)
+    if request.method == 'POST':
+        alumni.name = request.form['name']
+        alumni.grad_year = int(request.form['grad_year'])
+        alumni.job_title = request.form['job_title']
+        alumni.company = request.form['company']
+        db.session.commit()
+        flash('Alumni updated!')
+        return redirect(url_for('index'))
+    return render_template('edit.html', alumni=alumni)
+
+@app.route('/delete/<int:id>')
+@login_required
+def delete(id):
+    alumni = Alumni.query.get_or_404(id)
+    db.session.delete(alumni)
+    db.session.commit()
+    flash('Alumni deleted!')
+    return redirect(url_for('index'))
+
+@app.route('/export')
+@login_required
+def export():
+    alumni_list = Alumni.query.all()
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['Name', 'Grad Year', 'Job Title', 'Company'])
+    for alumni in alumni_list:
+        cw.writerow([alumni.name, alumni.grad_year, alumni.job_title, alumni.company])
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
+
+@app.route('/sample')
+@login_required
+def sample():
+    sample_data = [
+        ('Ravi Kumar', 2020, 'Software Engineer', 'TCS'),
+        ('Priya Sharma', 2021, 'Data Scientist', 'Google'),
+        ('Arun Patel', 2019, 'ML Engineer', 'Microsoft')
+    ]
+    for name, year, title, company in sample_data:
+        if not Alumni.query.filter_by(name=name).first():
+            alumni = Alumni(name=name, grad_year=year, job_title=title, company=company)
+            db.session.add(alumni)
+    db.session.commit()
+    flash('Sample data added!')
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
