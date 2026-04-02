@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Alumni Portal</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+table {border-collapse: collapse; width:100%}
+th, td {border:1px solid #ddd; padding:8px; text-align:left}
+th {background-color:#f2f2f2}
+</style>
+</head>
+<body>
+<h1>🎓 Alumni Directory ({{stats.total}} total)</h1>
+<form method="POST">
+<input name="search" placeholder="Search name/company/year..." value="{{search}}">
+<button>🔍 Search</button>
+</form>
+<br>
+<a href="/add">➕ Add Alumni</a> | 
+<a href="/seed">📊 Sample Data</a> | 
+<a href="/export">📥 Export CSV</a> | 
+<a href="/logout">🚪 Logout</a>
+<hr>
+<table>
+<tr><th>ID</th><th>Name</th><th>Grad Year</th><th>Job Title</th><th>Company</th><th>Actions</th></tr>
+{% for a in alumni %}
