@@ -1,53 +1,60 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Alumni Portal</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<style>
-table {border-collapse: collapse; width:100%; margin:20px 0}
-th, td {border:1px solid #ddd; padding:12px; text-align:left}
-th {background-color:#4CAF50; color:white}
-tr:nth-child(even) {background-color:#f2f2f2}
-input[type="search"] {padding:10px; width:300px}
-button {background:#4CAF50; color:white; padding:10px 20px; border:none; cursor:pointer}
-a {color:#2196F3; text-decoration:none}
-</style>
-</head>
-<body>
-<h1>🎓 Alumni Directory ({{stats.total}} total alumni)</h1>
-
-<form method="POST">
-<input name="search" placeholder="Search name/company/year..." value="{{search}}" style="padding:10px">
-<button type="submit">🔍 Search</button>
-</form>
-
-<br>
-<a href="/add">➕ Add New Alumni</a> | 
-<a href="/seed">📊 Load Sample Data</a> | 
-<a href="/export">📥 Export CSV</a> | 
-<a href="/logout">🚪 Logout</a>
-
-<hr>
-
-<table>
-<tr>
-<th>ID</th><th>Name</th><th>Grad Year</th><th>Job Title</th><th>Company</th><th>Actions</th>
-</tr>
-{% for a in alumni %}
-<tr>
-<td>{{a.id}}</td>
-<td>{{a.name}}</td>
-<td>{{a.grad_year}}</td>
-<td>{{a.job_title}}</td>
-<td>{{a.company}}</td>
-<td>
-<a href="/edit/{{a.id}}">✏️ Edit</a> | 
-<a href="/delete/{{a.id}}" onclick="return confirm('Delete?')">🗑️ Delete</a>
-</td>
-</tr>
-{% endfor %}
-</table>
-
-<p><strong>Stats:</strong> {{stats.total}} alumni | Top companies: {{stats.companies}}</p>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="fas fa-users"></i> Alumni Directory ({{ total }})</h2>
+      {% if session.logged_in %}
+      <a href="{{ url_for('sample') }}" class="btn btn-info"><i class="fas fa-database"></i> Sample Data</a>
+      {% endif %}
+    </div>
+    
+    <div class="card p-4">
+      <form method="GET" class="mb-4">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" name="search" class="form-control" placeholder="Search name, company, job..." value="{{ search }}">
+          <button class="btn btn-primary">Search</button>
+        </div>
+      </form>
+      
+      {% if alumni %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Name</th><th>Grad Year</th><th>Job Title</th><th>Company</th>
+              {% if session.logged_in %}<th>Actions</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for alum in alumni %}
+            <tr>
+              <td><strong>{{ alum.name }}</strong></td>
+              <td>{{ alum.grad_year }}</td>
+              <td>{{ alum.job_title }}</td>
+              <td><span class="badge bg-success">{{ alum.company }}</span></td>
+              {% if session.logged_in %}
+              <td>
+                <a href="{{ url_for('edit', id=alum.id) }}" class="btn btn-sm btn-outline-primary">✏️</a>
+                <a href="{{ url_for('delete', id=alum.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete?')">🗑️</a>
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+        <h4>No alumni found</h4>
+        {% if session.logged_in %}
+        <a href="{{ url_for('add') }}" class="btn btn-primary">➕ Add First Alumni</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
