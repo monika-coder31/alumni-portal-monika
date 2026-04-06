@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center min-vh-100">
+      <div class="col-lg-6">
+        <h1 class="display-3 fw-bold mb-4 animate__animated animate__fadeInUp">
+          Welcome to <span class="text-primary">Alumni Portal</span>
+        </h1>
+        <p class="lead mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+          Connect with successful graduates. Showcase achievements. Build your network.
+        </p>
+        <div class="animate__animated animate__fadeInUp animate__delay-2s">
+          <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-3 px-5 py-3">
+            🚀 Admin Login
+          </a>
+          <a href="#features" class="btn btn-outline-light btn-lg px-5 py-3">
+            📊 View Stats
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center">
+        <div class="hero-img animate__animated animate__zoomIn">
+          <i class="fas fa-graduation-cap fa-10x text-white opacity-75"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-5">✨ Why Choose Our Portal?</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-lg">
+          <div class="card-body text-center p-4">
+            <i class="fas fa-search fa-3x text-primary mb-3"></i>
+            <h4>Smart Search</h4>
+            <p>Find alumni by name, company, or role instantly.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-lg">
+          <div class="card-body text-center p-4">
+            <i class="fas fa-chart-pie fa-3x text-success mb-3"></i>
+            <h4>Analytics</h4>
+            <p>Visual charts & insights about alumni achievements.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-lg">
+          <div class="card-body text-center p-4">
+            <i class="fas fa-download fa-3x text-info mb-3"></i>
+            <h4>Export Data</h4>
+            <p>Download alumni directory as CSV anytime.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
