@@ -1,4 +1,3 @@
-complete_app = """
 from flask import Flask, render_template_string, request, session, redirect, jsonify
 import os
 import hashlib
@@ -16,11 +15,11 @@ def load_alumni():
             return json.load(f)
     except:
         data = [
-            {\"id\": 1, \"name\": \"John Doe\", \"grad\": \"2020\", \"company\": \"Google\", \"role\": \"Engineer\", \"email\": \"john@google.com\"},
-            {\"id\": 2, \"name\": \"Jane Smith\", \"grad\": \"2021\", \"company\": \"Microsoft\", \"role\": \"Data Scientist\", \"email\": \"jane@microsoft.com\"},
-            {\"id\": 3, \"name\": \"Mike Johnson\", \"grad\": \"2019\", \"company\": \"Amazon\", \"role\": \"Product Manager\", \"email\": \"mike@amazon.com\"},
-            {\"id\": 4, \"name\": \"Sarah Wilson\", \"grad\": \"2022\", \"company\": \"Meta\", \"role\": \"UX Designer\", \"email\": \"sarah@meta.com\"},
-            {\"id\": 5, \"name\": \"David Brown\", \"grad\": \"2018\", \"company\": \"Netflix\", \"role\": \"DevOps\", \"email\": \"david@netflix.com\"}
+            {"id": 1, "name": "John Doe", "grad": "2020", "company": "Google", "role": "Engineer", "email": "john@google.com"},
+            {"id": 2, "name": "Jane Smith", "grad": "2021", "company": "Microsoft", "role": "Data Scientist", "email": "jane@microsoft.com"},
+            {"id": 3, "name": "Mike Johnson", "grad": "2019", "company": "Amazon", "role": "Product Manager", "email": "mike@amazon.com"},
+            {"id": 4, "name": "Sarah Wilson", "grad": "2022", "company": "Meta", "role": "UX Designer", "email": "sarah@meta.com"},
+            {"id": 5, "name": "David Brown", "grad": "2018", "company": "Netflix", "role": "DevOps", "email": "david@netflix.com"}
         ]
         save_alumni(data)
         return data
@@ -29,39 +28,39 @@ def save_alumni(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=2)
 
-users = {\"admin\": hashlib.md5(\"admin123\".encode()).hexdigest()}
+users = {"admin": hashlib.md5("admin123".encode()).hexdigest()}
 alumni_data = load_alumni()
 
 CSS = '''
 <style>
-*{{margin:0;padding:0;box-sizing:border-box;}}
-body{{font-family:Arial,sans-serif;background:#f0f2f5;padding:20px;}}
-.container{{max-width:1400px;margin:auto;}}
-.header{{background:#4267b2;color:white;padding:30px;border-radius:10px;text-align:center;}}
-.nav{{display:flex;gap:15px;justify-content:center;margin:30px 0;flex-wrap:wrap;}}
-.nav a{{background:#1877f2;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;}}
-.login-box, .admin-only{{max-width:500px;margin:50px auto;background:white;padding:40px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}}
-.logout{{float:right;background:#e74c3c;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;font-weight:bold;}}
-.search-box{{max-width:600px;margin:20px auto;text-align:center;}}
-.search-input{{width:70%;padding:15px;font-size:16px;border:2px solid #ddd;border-radius:30px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}}
-.btn{{padding:12px 30px;background:#28a745;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;margin:5px;transition:all 0.3s;}}
-.btn:hover{{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.2);}}
-.btn-danger{{background:#dc3545;}}
-.table{{width:100%;border-collapse:collapse;margin:20px 0;background:white;border-radius:15px;overflow:hidden;box-shadow:0 5px 20px rgba(0,0,0,0.1);}}
-.table th{{background:#f8f9fa;padding:18px;font-weight:bold;text-align:left;border-bottom:3px solid #4267b2;}}
-.table td{{padding:15px;border-bottom:1px solid #eee;}}
-.table tr:hover{{background:#f8f9fa;}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:25px;margin:30px 0;}}
-.card{{background:white;padding:30px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.1);transition:all 0.3s;}}
-.card:hover{{transform:translateY(-5px);box-shadow:0 20px 40px rgba(0,0,0,0.2);}}
-.form-group{{margin:20px 0;}}
-.form-group label{{display:block;margin-bottom:8px;font-weight:bold;color:#333;font-size:16px;}}
-.form-group input{{width:100%;padding:15px;border:2px solid #e1e5e9;border-radius:10px;font-size:16px;transition:border-color 0.3s;}}
-.form-group input:focus{{outline:none;border-color:#4267b2;box-shadow:0 0 0 3px rgba(66,103,178,0.1);}}
-.message{{padding:15px;margin:20px 0;border-radius:10px;text-align:center;font-weight:bold;}}
-.message.success{{background:#d4edda;color:#155724;border:1px solid #c3e6cb;}}
-.message.error{{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;}}
-.public-badge{{background:#17a2b8;color:white;padding:5px 12px;border-radius:20px;font-size:14px;margin-left:10px;}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Arial,sans-serif;background:#f0f2f5;padding:20px;}
+.container{max-width:1400px;margin:auto;}
+.header{background:#4267b2;color:white;padding:30px;border-radius:10px;text-align:center;}
+.nav{display:flex;gap:15px;justify-content:center;margin:30px 0;flex-wrap:wrap;}
+.nav a{background:#1877f2;color:white;padding:12px 24px;text-decoration:none;border-radius:25px;font-weight:bold;}
+.login-box,.admin-only{max-width:500px;margin:50px auto;background:white;padding:40px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.2);}
+.logout{float:right;background:#e74c3c;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;font-weight:bold;}
+.search-box{max-width:600px;margin:20px auto;text-align:center;}
+.search-input{width:70%;padding:15px;font-size:16px;border:2px solid #ddd;border-radius:30px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+.btn{padding:12px 30px;background:#28a745;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;margin:5px;transition:all 0.3s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
+.btn-danger{background:#dc3545;}
+.table{width:100%;border-collapse:collapse;margin:20px 0;background:white;border-radius:15px;overflow:hidden;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+.table th{background:#f8f9fa;padding:18px;font-weight:bold;text-align:left;border-bottom:3px solid #4267b2;}
+.table td{padding:15px;border-bottom:1px solid #eee;}
+.table tr:hover{background:#f8f9fa;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:25px;margin:30px 0;}
+.card{background:white;padding:30px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.1);transition:all 0.3s;}
+.card:hover{transform:translateY(-5px);box-shadow:0 20px 40px rgba(0,0,0,0.2);}
+.form-group{margin:20px 0;}
+.form-group label{display:block;margin-bottom:8px;font-weight:bold;color:#333;font-size:16px;}
+.form-group input{width:100%;padding:15px;border:2px solid #e1e5e9;border-radius:10px;font-size:16px;transition:border-color 0.3s;}
+.form-group input:focus{outline:none;border-color:#4267b2;box-shadow:0 0 0 3px rgba(66,103,178,0.1);}
+.message{padding:15px;margin:20px 0;border-radius:10px;text-align:center;font-weight:bold;}
+.message.success{background:#d4edda;color:#155724;border:1px solid #c3e6cb;}
+.message.error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;}
+.public-badge{background:#17a2b8;color:white;padding:5px 12px;border-radius:20px;font-size:14px;margin-left:10px;}
 </style>
 '''
 
@@ -76,7 +75,6 @@ def home():
         return redirect('/')
     
     if 'user' in session and session.get('is_admin'):
-        # Show admin dashboard
         recent = alumni_data[-3:] if alumni_data else []
         cards = ''
         for alum in recent:
@@ -104,7 +102,6 @@ def home():
         <div class="grid">{cards}</div>
         </div></body></html>'''
     
-    # Public home (login form for admin only)
     return f'''<!DOCTYPE html><html><head><title>🎓 Alumni Portal</title>{CSS}</head><body>
     <div class="container">
     <div class="header">
@@ -141,7 +138,6 @@ def logout():
 
 @app.route('/alumni')
 def alumni():
-    # PUBLIC ACCESS - No login required!
     search = request.args.get('search', '')
     filtered = alumni_data
     if search:
@@ -204,7 +200,6 @@ def alumni():
     {admin_panel}
     </div></body></html>'''
 
-# Admin routes (admin only)
 @app.route('/admin/add', methods=['GET', 'POST'])
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
@@ -321,12 +316,3 @@ def admin_delete(alum_id):
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
-"""
-
-line_count = len(complete_app.splitlines())
-print(f"TOTAL LINES: {line_count}")
-
-with open("output/alumni_portal_public_admin_final.py", "w") as f:
-    f.write(complete_app)
-
-print("COMPLETE app.py SAVED!")
