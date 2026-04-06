@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-body text-center p-5">
-        <h1 class="display-4 mb-4"><i class="fas fa-unlock text-primary"></i></h1>
-        <h2>Admin Login</h2>
-        <p class="text-muted mb-4">Enter admin password to access dashboard</p>
+<div class="row justify-content-center min-vh-100 align-items-center">
+  <div class="col-md-5">
+    <div class="card shadow-lg border-0">
+      <div class="card-body p-5">
+        <div class="text-center mb-5">
+          <i class="fas fa-university fa-4x text-primary mb-3"></i>
+          <h2>College Admin Portal</h2>
+        </div>
         
         <form method="POST">
           <div class="mb-4">
-            <input type="password" name="password" class="form-control form-control-lg text-center" placeholder="ai123" required>
-            <small class="text-muted mt-2 d-block">Password: <strong>ai123</strong></small>
+            abel class="form-label fw-bold">College Email</label>
+            <input type="email" name="email" class="form-control form-control-lg" 
+                   placeholder="student@college.edu" required>
+            <small class="text-muted">Use your college email (@college.edu / @student.ac.in)</small>
           </div>
-          <button type="submit" class="btn btn-primary btn-lg px-5">🚀 Enter Portal</button>
+          <div class="mb-4">
+            abel class="form-label fw-bold">Password</label>
+            <input type="password" name="password" class="form-control form-control-lg" 
+                   placeholder="college123" required>
+            <small class="text-muted d-block">Common password: <strong>college123</strong></small>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-100 py-3">
+            🚀 Enter Dashboard
+          </button>
         </form>
       </div>
     </div>
