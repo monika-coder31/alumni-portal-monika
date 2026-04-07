@@ -109,7 +109,7 @@ def home():
         <p>Connect with graduates • View alumni success stories • Admin login below</p>
     </div>
     <div class="login-box">
-        <h2 style="margin-bottom:25px;text-align:center;">🔐 Admin Login (Optional)</h2>
+        <h2 style="margin-bottom:25px;text-align:center;">🔐 Admin Login </h2>
         <form method="POST">
             <div class="form-group">
                 <label>Admin Username:</label>
